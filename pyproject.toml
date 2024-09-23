@@ -1,0 +1,4 @@
+[tool.black]
+line-length = 80
+target-version = ['py312']
+exclude = '\.git|\.mypy_cache|__pycache__|\.venv|build|dist'
