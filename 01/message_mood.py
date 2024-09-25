@@ -7,8 +7,6 @@ class SomeModel:
 def predict_message_mood(
     message: str, bad_thresholds: float = 0.3, good_thresholds: float = 0.8
 ) -> str:
-    model = SomeModel()
-
     if not isinstance(message, str):
         raise TypeError(
             f"Получено {type(message).__name__}. "
@@ -29,6 +27,7 @@ def predict_message_mood(
             "bad_thresholds должен быть меньше или равен good_thresholds"
         )
 
+    model = SomeModel()
     pred = model.predict(message=message.lower()) # pylint: disable=E1111
 
     if pred > good_thresholds:
