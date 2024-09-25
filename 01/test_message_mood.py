@@ -58,11 +58,13 @@ class TestPredMessageMood(unittest.TestCase):
         Проверка, что bad_thresholds и good_thresholds некорректные
         """
         invalid_thresholds = [
-            (-1, None),
-            (2, None),
-            (None, -1),
-            (None, 2),
-            (1, 0.5),
+            (0.5, None),
+            (None, 1),
+            (-0.5, 0.9),
+            (1.5, 0.9),
+            (0.5, -0.9),
+            (0.5, 1.9),
+            (0.9, 0.5),
         ]
         for bad, good in invalid_thresholds:
             with self.assertRaises((ValueError, TypeError)):
