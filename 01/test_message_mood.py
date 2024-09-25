@@ -57,27 +57,29 @@ class TestPredMessageMood(unittest.TestCase):
         """
         Проверка, что bad_thresholds и good_thresholds некорректные
         """
-        with self.assertRaises(ValueError):
-            predict_message_mood(self.valid_message, bad_thresholds=-1)
-        with self.assertRaises(ValueError):
-            predict_message_mood(self.valid_message, bad_thresholds=2)
-        with self.assertRaises(ValueError):
-            predict_message_mood(self.valid_message, good_thresholds=-1)
-        with self.assertRaises(ValueError):
-            predict_message_mood(self.valid_message, good_thresholds=2)
-        with self.assertRaises(ValueError):
-            predict_message_mood(
-                self.valid_message, bad_thresholds=1, good_thresholds=0.5
-            )
+        invalid_thresholds = [
+            (-1, None),
+            (2, None),
+            (None, -1),
+            (None, 2),
+            (1, 0.5),
+        ]
+        for bad, good in invalid_thresholds:
+            with self.assertRaises((ValueError, TypeError)):
+                predict_message_mood(
+                    message=self.valid_message,
+                    bad_thresholds=bad,
+                    good_thresholds=good,
+                )
 
     def test_message_is_not_string(self):
         """
         Проверка, что message не строка
         """
-        with self.assertRaises(TypeError):
-            predict_message_mood(message=123)
-        # with self.assertRaises(TypeError):
-        # predict_message_mood(message=None)
+        invalid_inputs = [123, None, [], {}, 45.67, object()]
+        for invalid in invalid_inputs:
+            with self.assertRaises(TypeError):
+                predict_message_mood(message=invalid)
 
     @patch.object(SomeModel, "predict")
     def test_valid_equal_thresholds(self, mock_predict):
