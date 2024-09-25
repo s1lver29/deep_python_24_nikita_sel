@@ -30,7 +30,7 @@ jobs:
         if: ${{ always() }}
         run: pylint ./*/*.py
 
-      - name: Check tests with pytest
+      - name: Check tests with unittest
         if: ${{ always() }}
         run: coverage run -m unittest discover -p "*.py"
 
