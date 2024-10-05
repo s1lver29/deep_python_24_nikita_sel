@@ -2,13 +2,33 @@ import json
 from typing import Callable
 
 
+def _process_words(
+    key: str, words: list[str], callback: Callable[[str, str], None] | None
+):
+    """Обработка слов без токенов"""
+    for word in words:
+        callback(key, word)
+
+
+def _process_tokens(
+    key: str,
+    lower_words: list[str],
+    lower_tokens: list[str],
+    tokens: list[str],
+    callback: Callable[[str, str], None] | None = None,
+):
+    """Обработка слов с токенами"""
+    for token in lower_words:
+        if token in lower_tokens:
+            callback(key, tokens[lower_tokens.index(token)])
+
+
 def process_json(
     json_str: str,
     required_keys: list[str] | None = None,
     tokens: list[str] | None = None,
     callback: Callable[[str, str], None] | None = None,
 ) -> None:
-
     try:
         data = json.loads(json_str)
     except Exception as error:
@@ -35,11 +55,10 @@ def process_json(
 
     if not callable(callback) and callback is not None:
         raise TypeError(
-            "callback является Callable[[str, str], None] " "или быть None"
+            "callback является Callable[[str, str], None] или быть None"
         )
 
-    if tokens:
-        lower_tokens = [token.lower() for token in tokens]
+    lower_tokens = [token.lower() for token in tokens] if tokens else []
 
     for key, value in data.items():
         words = value.split()
@@ -50,23 +69,8 @@ def process_json(
             lower_words = [word.lower() for word in words]
 
             if not tokens:
-                for word in words:
-                    callback(key, word)
+                _process_words(key, words, callback)
             else:
-                for token in lower_words:
-                    if token in lower_tokens:
-                        callback(key, tokens[lower_tokens.index(token)])
-
-
-if __name__ == "__main__":
-    json_str = '{"key1": "Word1 word2 WoRd1", "key2": "word2 word3"}'
-    required_keys = ["key1", "KEY2"]
-    tokens = ["WORD1", "word2"]
-
-    process_json(
-        json_str,
-        required_keys=required_keys,
-        tokens=tokens,
-        # callback=None
-        callback=lambda key, token: print(f"{key=}, {token=}"),
-    )
+                _process_tokens(
+                    key, lower_words, lower_tokens, tokens, callback
+                )
