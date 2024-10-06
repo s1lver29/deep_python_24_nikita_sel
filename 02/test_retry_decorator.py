@@ -1,14 +1,13 @@
 import unittest
-from unittest.mock import Mock, call, patch
-from typing import Type, Any, List
+from unittest.mock import Mock
 
-from retry_decorator import retry_deco
+from .retry_decorator import retry_deco
+
 
 class TestRetryDecorator(unittest.TestCase):
     def setUp(self):
         print(f"\nStart test {self.id()}")
 
-    
     def tearDown(self) -> None:
         print(f"End test {self.id()}")
 
@@ -22,7 +21,6 @@ class TestRetryDecorator(unittest.TestCase):
 
         self.assertEqual(result, 10)
         mock_func.assert_called_once_with(2, 3)
-
 
     def test_retry_on_exception(self):
         """Тест на несколько попыток при возникновении исключения"""
@@ -52,7 +50,9 @@ class TestRetryDecorator(unittest.TestCase):
         mock_func = Mock(side_effect=ValueError("Expected failure"))
         mock_func.__name__ = "mock_func"
 
-        decorated_func = retry_deco(retries=3, exceptions=[ValueError])(mock_func)
+        decorated_func = retry_deco(retries=3, exceptions=[ValueError])(
+            mock_func
+        )
 
         with self.assertRaises(ValueError):
             decorated_func()
@@ -133,7 +133,13 @@ class TestRetryDecorator(unittest.TestCase):
 
     def test_retry_on_multiple_exceptions(self):
         """Тест на работу с несколькими видами исключений"""
-        mock_func = Mock(side_effect=[TypeError("First failure"), ValueError("Second failure"), "Success"])
+        mock_func = Mock(
+            side_effect=[
+                TypeError("First failure"),
+                ValueError("Second failure"),
+                "Success",
+            ]
+        )
         mock_func.__name__ = "mock_func"
 
         decorated_func = retry_deco(retries=3)(mock_func)
@@ -143,7 +149,10 @@ class TestRetryDecorator(unittest.TestCase):
         self.assertEqual(mock_func.call_count, 3)
 
     def test_zero_retries(self):
-        """Тест на случай, если количество попыток ноль или отрицательное число"""
+        """
+        Тест на случай, если количество попыток ноль
+        или отрицательное число
+        """
         mock_func = Mock()
         mock_func.__name__ = "mock_func"
 
@@ -151,7 +160,7 @@ class TestRetryDecorator(unittest.TestCase):
             retry_deco(retries=0)(mock_func)
 
         mock_func.assert_not_called()
-        
+
         with self.assertRaises(ValueError):
             retry_deco(retries=-5)(mock_func)
 
