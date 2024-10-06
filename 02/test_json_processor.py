@@ -1,3 +1,4 @@
+# pylint: disable=R0801
 import unittest
 from unittest.mock import Mock
 

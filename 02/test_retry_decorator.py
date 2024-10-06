@@ -1,3 +1,4 @@
+# pylint: disable=R0801
 import unittest
 from unittest.mock import Mock
 
@@ -69,7 +70,7 @@ class TestRetryDecorator(unittest.TestCase):
             (1, 2, 3),
             ("value", "value"),
             object,
-            [12, 23],
+            [12, 23, 123],
             [object],
             [None, 123],
         ]
