@@ -10,10 +10,22 @@ def retry_deco(
     if retries is None:
         retries = 1
 
-    if isinstance(exceptions, list) and all(
+    if not isinstance(retries, int) or isinstance(retries, bool):
+        raise TypeError(
+            "retries должен быть числом (int) или быть пустым" 
+        )
+    if retries < 1:
+        raise ValueError(
+            "retries должно быть больше нуля (> 0)"
+        )
+
+    if not isinstance(exceptions, list) or not all(
         isinstance(exception, type) for exception in exceptions
     ):
-        print("ok")
+        raise TypeError(
+            "exception должен быть списком с объектами ислючениями "
+            "или быть пустым"
+        )
 
     def decorator(func) -> Any:
         @wraps(func)
@@ -26,13 +38,14 @@ def retry_deco(
             for attempt in range(retries):
                 try:
                     result = func(*args, **kwargs)
-                    print(*info_function, f"{attempt=}, {result=}", sep="")
+                    print(*info_function, f"attempt = {attempt + 1}, {result=}", sep="")
                     return result
                 except Exception as error:  # pylint: disable=broad-except
                     print(
                         *info_function,
                         f"attempt = {attempt + 1}, "
-                        f"exception = {error.__class__.__name__}",
+                        f"exception = {error.__class__.__name__}, "
+                        f"info_exception = {error}",
                         sep="",
                     )
                     if (
@@ -45,3 +58,12 @@ def retry_deco(
         return wrappers
 
     return decorator
+
+
+# @retry_deco(None, None)
+# def add(a, b):
+#     return a + b
+
+
+# if __name__ == "__main__":
+#     add(a=None, b=2)
