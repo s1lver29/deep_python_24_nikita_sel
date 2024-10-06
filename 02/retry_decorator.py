@@ -12,7 +12,7 @@ def retry_deco(
 
     if not isinstance(retries, int) or isinstance(retries, bool):
         raise TypeError(
-            "retries должен быть числом (int) или быть пустым" 
+            "retries должен быть числом (int) или быть пустым"
         )
     if retries < 1:
         raise ValueError(
@@ -29,7 +29,7 @@ def retry_deco(
 
     def decorator(func) -> Any:
         @wraps(func)
-        def wrappers(*args, **kwargs) -> Any:
+        def wrappers(*args, **kwargs) -> Any:  # pylint: disable = R1710
             info_function = (
                 f'run "{func.__name__}" with ',
                 f"positional {args=}, " if args else "",
@@ -38,7 +38,9 @@ def retry_deco(
             for attempt in range(retries):
                 try:
                     result = func(*args, **kwargs)
-                    print(*info_function, f"attempt = {attempt + 1}, {result=}", sep="")
+                    print(*info_function,
+                          f"attempt = {attempt + 1}, {result=}",
+                          sep="")
                     return result
                 except Exception as error:  # pylint: disable=broad-except
                     print(
@@ -53,7 +55,6 @@ def retry_deco(
                         or attempt + 1 == retries
                     ):
                         raise error
-            return None
 
         return wrappers
 
