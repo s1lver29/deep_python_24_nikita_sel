@@ -20,7 +20,7 @@ def retry_deco(
         )
 
     if not isinstance(exceptions, list) or not all(
-        isinstance(exception, type) for exception in exceptions
+        issubclass(exception, Exception) for exception in exceptions
     ):
         raise TypeError(
             "exception должен быть списком с объектами ислючениями "
