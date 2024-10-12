@@ -83,6 +83,6 @@ class CustomList(list):
 
     def __ge__(self, other: "CustomList") -> bool:
         return sum(self) >= sum(other)
-    
+
     def __str__(self):
         return f"CustomList({super().__str__()}) with sum {sum(self)}"
