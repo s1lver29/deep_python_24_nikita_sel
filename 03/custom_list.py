@@ -74,6 +74,9 @@ class CustomList(list):
     def __eq__(self, other: "CustomList") -> bool:
         return sum(self) == sum(other)
 
+    def __ne__(self, other: "CustomList") -> bool:
+        return sum(self) != sum(other)
+
     def __gt__(self, other: "CustomList") -> bool:
         return sum(self) > sum(other)
 
