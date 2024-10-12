@@ -12,10 +12,11 @@ class CustomList(list):
         )
 
     def __sub_lists(
-        self, other: Union[list[int], "CustomList"]
+        self, other: Union[list[int], "CustomList"], reverse: bool = False
     ) -> "CustomList":
+        reverse = -1 if reverse is True else 1
         return CustomList(
-            self_value - other_value
+            reverse * (self_value - other_value)
             for self_value, other_value in zip_longest(self, other, fillvalue=0)
         )
 
@@ -59,7 +60,7 @@ class CustomList(list):
         if isinstance(other, int):
             other = [other] * len(self)
         if isinstance(other, (list, CustomList)):
-            return self.__sub_lists(other)
+            return self.__sub_lists(other, reverse=True)
 
         raise ValueError(
             f"Получено {other=}. А надо list[int] | int | CustomList"
@@ -82,3 +83,6 @@ class CustomList(list):
 
     def __ge__(self, other: "CustomList") -> bool:
         return sum(self) >= sum(other)
+    
+    def __str__(self):
+        return f"CustomList({super().__str__()}) with sum {sum(self)}"
