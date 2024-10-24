@@ -40,7 +40,15 @@ def predict_message_mood(
         )
 
     model = SomeModel()
-    pred = model.predict(message=message.lower())  # pylint: disable=E1111
+    pred = float(
+        model.predict(message=message.lower())
+    )  # pylint: disable=E1111
+
+    if not 0 <= pred <= 1:
+        raise ValueError(
+            "Ожидался pred с вероятностью от 0 до 1. "
+            f"Получено {pred=}; {type(pred).__name__}"
+        )
 
     if pred > good_thresholds:
         return "отл"
