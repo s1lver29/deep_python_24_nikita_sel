@@ -17,6 +17,7 @@ class URLFetcher:
     async def fetch(self, session, url):
         async with self.semaphore:
             print(f"Starting request to {url}")
+            self.total_urls += 1
             try:
                 async with session.get(url) as response:
                     data = await response.text()
@@ -33,6 +34,7 @@ class URLFetcher:
                         )
                     return data
             except Exception as e:
+                self.error_count += 1
                 print(f"Error fetching {url}: {e}")
                 return None
 
