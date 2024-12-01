@@ -102,6 +102,39 @@ class TestLRUCache(unittest.TestCase):
         self.assertEqual(self.cache.get("k1"), "val1")
         self.assertEqual(self.cache.get("k3"), "val3")
 
+    def test_update_and_evict(self):
+        """
+        Тест:
+        - Корректное обновление значения по существующему ключу
+        и перемещение обновленного объекта в начало (head).
+        - Удаление наименее недавно использованного элемента
+        при добавлении нового.
+        """
+        self.cache.set("k1", "val1")
+        self.cache.set("k2", "val2")
+
+        self.assertEqual(
+            [self.cache.head.next.key, self.cache.head.next.next.key],
+            ["k2", "k1"],
+        )
+
+        self.cache.set("k1", "new_val")
+
+        self.assertEqual(
+            [self.cache.head.next.key, self.cache.head.next.next.key],
+            ["k1", "k2"],
+        )
+
+        self.cache.set("k3", "val3")
+
+        self.assertEqual(
+            [self.cache.head.next.key, self.cache.head.next.next.key],
+            ["k3", "k1"],
+        )
+        self.assertIsNone(
+            self.cache.get("k2")
+        )  # Проверка, что элемент вытеснился
+
     def test_zero_capacity(self):
         """
         Тест, что при создании кэша с нулевой ёмкостью выбрасывается ValueError
@@ -230,3 +263,83 @@ class TestLRUCache(unittest.TestCase):
         # Проверяем, что первые 1000 элементов были вытеснены
         for i in range(1000):
             self.assertIsNone(large_cache.get(f"key{i}"))
+
+
+class TestLRUCacheAdvanced(unittest.TestCase):
+    def setUp(self):
+        self.cache = LRUCache(4)
+        print(f"\nStart test {self.id()}")
+
+    def tearDown(self) -> None:
+        print(f"End test {self.id()}")
+
+    def test_complex_update_scenarios(self):
+        """
+        Тест сложных сценариев обновления:
+        - Последовательное обновление нескольких ключей.
+        - Проверка порядка элементов после обновлений.
+        """
+        # Добавляем элементы
+        self.cache.set("k1", "v1")
+        self.cache.set("k2", "v2")
+        self.cache.set("k3", "v3")
+        self.cache.set("k4", "v4")
+
+        # Обновляем "k1" и "k3"
+        self.cache.set("k1", "new_v1")
+        self.cache.set("k3", "new_v3")
+
+        # Добавляем новый элемент
+        self.cache.set("k5", "v5")
+
+        # Проверяем порядок: k5 -> k3 -> k1 -> k4
+        self.assertEqual(
+            [
+                self.cache.head.next.key,
+                self.cache.head.next.next.key,
+                self.cache.head.next.next.next.key,
+                self.cache.head.next.next.next.next.key,
+            ],
+            ["k5", "k3", "k1", "k4"],
+        )
+
+        self.assertEqual(self.cache.get("k5"), "v5")
+        self.assertEqual(self.cache.get("k3"), "new_v3")
+        self.assertEqual(self.cache.get("k1"), "new_v1")
+        self.assertEqual(self.cache.get("k4"), "v4")
+
+        self.assertIsNone(self.cache.get("k2"))
+
+    def test_consistency_after_operations(self):
+        """
+        Тест консистентности структуры двусвязного списка
+        после множества операций.
+        """
+        self.cache.set("k1", "v1")
+        self.cache.set("k2", "v2")
+        self.cache.set("k3", "v3")
+        self.cache.set("k4", "v4")
+
+        self.cache.set("k5", "v5")  # "k1" вытесняется
+
+        # Проверяем двусвязность списка
+        current = self.cache.head.next
+        keys_in_list = []
+        while current != self.cache.tail:
+            keys_in_list.append(current.key)
+            self.assertIs(
+                current.next.prev,
+                current,
+                f"Нарушена связь {current.key} -> next -> prev",
+            )
+            self.assertIs(
+                current.prev.next,
+                current,
+                f"Нарушена связь {current.key} -> prev -> next",
+            )
+            current = current.next
+
+        self.assertEqual(keys_in_list, ["k5", "k4", "k3", "k2"])
+
+        self.assertIs(self.cache.head.prev, None, "Head.prev должен быть None")
+        self.assertIs(self.cache.tail.next, None, "Tail.next должен быть None")
