@@ -1,0 +1,43 @@
+2024-12-02 02:44:59,434	lru_cache_logger	ERROR	Invalid limit: limit=-1
+2024-12-02 02:44:59,435	lru_cache_logger	DEBUG	Cache created with limit: 3
+2024-12-02 02:44:59,435	lru_cache_logger	DEBUG	Adding node: key=k1, value=v1
+2024-12-02 02:44:59,436	lru_cache_logger	INFO	SET key=k1: INSERTED value=v1
+2024-12-02 02:44:59,436	lru_cache_logger	DEBUG	Cache state after SET: ['k1']
+2024-12-02 02:44:59,437	lru_cache_logger	DEBUG	Adding node: key=k2, value=v2
+2024-12-02 02:44:59,437	lru_cache_logger	INFO	SET key=k2: INSERTED value=v2
+2024-12-02 02:44:59,438	lru_cache_logger	DEBUG	Cache state after SET: ['k1', 'k2']
+2024-12-02 02:44:59,438	lru_cache_logger	DEBUG	Attempting to get value for key: k1
+2024-12-02 02:44:59,439	lru_cache_logger	DEBUG	Moving node to front: key=k1, value=v1
+2024-12-02 02:44:59,439	lru_cache_logger	DEBUG	Removing node: key=k1, value=v1
+2024-12-02 02:44:59,439	lru_cache_logger	DEBUG	Adding node: key=k1, value=v1
+2024-12-02 02:44:59,440	lru_cache_logger	INFO	GET key=k1: value=v1
+2024-12-02 02:44:59,440	lru_cache_logger	DEBUG	Cache state after GET: ['k1', 'k2']
+2024-12-02 02:44:59,441	lru_cache_logger	DEBUG	Attempting to get value for key: k3
+2024-12-02 02:44:59,441	lru_cache_logger	INFO	GET key=k3: NO VALUE
+2024-12-02 02:44:59,441	lru_cache_logger	DEBUG	Adding node: key=k3, value=v3
+2024-12-02 02:44:59,442	lru_cache_logger	INFO	SET key=k3: INSERTED value=v3
+2024-12-02 02:44:59,442	lru_cache_logger	DEBUG	Cache state after SET: ['k1', 'k2', 'k3']
+2024-12-02 02:44:59,443	lru_cache_logger	DEBUG	Cache is full. Removing LRU key=k2, value=v2
+2024-12-02 02:44:59,443	lru_cache_logger	DEBUG	Removing node: key=k2, value=v2
+2024-12-02 02:44:59,443	lru_cache_logger	INFO	SET key=k4: EVICTION lru_node.key=k2, lru_node.value=v2
+2024-12-02 02:44:59,444	lru_cache_logger	DEBUG	Adding node: key=k4, value=v4
+2024-12-02 02:44:59,444	lru_cache_logger	INFO	SET key=k4: INSERTED value=v4
+2024-12-02 02:44:59,444	lru_cache_logger	DEBUG	Cache state after SET: ['k1', 'k3', 'k4']
+2024-12-02 02:44:59,445	lru_cache_logger	DEBUG	Moving node to front: key=k1, value=new_v1
+2024-12-02 02:44:59,445	lru_cache_logger	DEBUG	Removing node: key=k1, value=new_v1
+2024-12-02 02:44:59,445	lru_cache_logger	DEBUG	Adding node: key=k1, value=new_v1
+2024-12-02 02:44:59,446	lru_cache_logger	INFO	SET key=k1: UPDATED value=new_v1
+2024-12-02 02:44:59,446	lru_cache_logger	DEBUG	__setitem__ called for key: k3, value: new_v3
+2024-12-02 02:44:59,447	lru_cache_logger	DEBUG	Moving node to front: key=k3, value=new_v3
+2024-12-02 02:44:59,447	lru_cache_logger	DEBUG	Removing node: key=k3, value=new_v3
+2024-12-02 02:44:59,447	lru_cache_logger	DEBUG	Adding node: key=k3, value=new_v3
+2024-12-02 02:44:59,448	lru_cache_logger	INFO	SET key=k3: UPDATED value=new_v3
+2024-12-02 02:44:59,448	lru_cache_logger	DEBUG	__setitem__: Key k3 set with value new_v3.
+2024-12-02 02:44:59,448	lru_cache_logger	DEBUG	__getitem__ called for key: k4
+2024-12-02 02:44:59,448	lru_cache_logger	DEBUG	Attempting to get value for key: k4
+2024-12-02 02:44:59,448	lru_cache_logger	DEBUG	Moving node to front: key=k4, value=v4
+2024-12-02 02:44:59,448	lru_cache_logger	DEBUG	Removing node: key=k4, value=v4
+2024-12-02 02:44:59,449	lru_cache_logger	DEBUG	Adding node: key=k4, value=v4
+2024-12-02 02:44:59,449	lru_cache_logger	INFO	GET key=k4: value=v4
+2024-12-02 02:44:59,449	lru_cache_logger	DEBUG	Cache state after GET: ['k1', 'k3', 'k4']
+2024-12-02 02:44:59,449	lru_cache_logger	DEBUG	__getitem__: Retrieved value v4 for key k4.
