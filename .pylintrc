@@ -3,7 +3,8 @@ disable=
     C0114, # missing-module-docstring
     C0115,
     C0116,
-    C0103 # snake_case naming style (invalid-name) name file: 01,02,03,04,etc.
+    C0103, # snake_case naming style (invalid-name) name file: 01,02,03,04,etc.
+    R0801 # Repeat code hw05 and hw09
 
 [FORMAT]
 max-line-length=80
