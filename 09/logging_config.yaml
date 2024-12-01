@@ -1,0 +1,28 @@
+version: 1
+disable_existing_loggers: false
+formatters:
+  formatter_file:
+    format: "%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s"
+  formatter_stdout:
+    format: "%(asctime)s\t%(name)s\t%(levelname)s\t%(message)70s\t%(funcName)s:%(lineno)d"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+handlers:
+  file:
+    class: logging.FileHandler
+    level: DEBUG
+    formatter: formatter_file
+    filename: cache.log
+    mode: w
+  console:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: formatter_stdout
+    stream: ext://sys.stdout
+loggers:
+  lru_cache_logger:
+    level: DEBUG
+    handlers: [file]
+    propagate: no
+root:
+  level: WARNING
+  handlers: [console]
