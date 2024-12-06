@@ -1,25 +1,30 @@
 # pylint: disable=R0903
+from abc import ABC, abstractmethod
 
 
-class BaseDescriptor:
+class BaseDescriptor(ABC):
     def __init__(self):
-        self.owner = None
         self.name = None
+        self.private_name = None
 
-    def __set_name__(self, owner, name):
-        self.owner = owner
+    def __set_name__(self, owner, name) -> None:
         self.name = name
+        self.private_name = f"_{name}"
 
-    def __set__(self, instance, value):
+    def __set__(self, instance, value) -> None:
         self.validate(value)
-        instance.__dict__[self.name] = value
+        setattr(instance, self.private_name, value)
 
+    def __get__(self, instance, owner) -> object:
+        return getattr(instance, self.private_name, None)
+
+    @abstractmethod
     def validate(self, value):
-        raise NotImplementedError("Подклассы должны реализовать этот метод.")
+        pass
 
 
 class FeatureCount(BaseDescriptor):
-    def validate(self, value):
+    def validate(self, value: int) -> None:
         if not isinstance(value, int):
             raise ValueError(f"{self.name} должен быть целым числом.")
         if value <= 0:
@@ -29,7 +34,7 @@ class FeatureCount(BaseDescriptor):
 
 
 class Label(BaseDescriptor):
-    def validate(self, value):
+    def validate(self, value: str) -> None:
         if not isinstance(value, str):
             raise ValueError(f"{self.name} должен быть строкой.")
         if not value.strip():
@@ -37,7 +42,7 @@ class Label(BaseDescriptor):
 
 
 class LearningRate(BaseDescriptor):
-    def validate(self, value):
+    def validate(self, value: float | int) -> None:
         if not isinstance(value, (float, int)):
             raise ValueError(f"{self.name} должен быть числом.")
         if value <= 0 or value > 1:

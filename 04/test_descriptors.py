@@ -1,8 +1,8 @@
 import unittest
-from .descriptors import MLModel, BaseDescriptor
+from .descriptors import MLModel
 
 
-class TestMLModel(unittest.TestCase):
+class TestMLModelAttributes(unittest.TestCase):
     def setUp(self):
         print(f"\nStart test {self.id()}")
 
@@ -172,22 +172,62 @@ class TestMLModel(unittest.TestCase):
             str(context.exception), "learning_rate должен быть числом."
         )
 
-    def test_feature_count_validate_not_implemented(self):
-        """
-        Тест, что метод validate в BaseDescriptor вызывает NotImplementedError.
-        """
 
-        class IncompleteClass(BaseDescriptor):  # pylint: disable=W0223,R0903
-            pass
+class TestMLModelBehavior(unittest.TestCase):
+    def setUp(self):
+        print(f"\nStart test {self.id()}")
 
-        with self.assertRaises(NotImplementedError) as context:
-            BaseDescriptor().validate(object)
-        self.assertEqual(
-            str(context.exception), "Подклассы должны реализовать этот метод."
+    def tearDown(self) -> None:
+        print(f"End test {self.id()}")
+
+    def test_instance_independence(self):
+        """
+        Тест, что изменения атрибутов одного экземпляра
+        не влияют на другой экземпляр
+        """
+        model_1 = MLModel(1, "abc", 0.01)
+        model_2 = MLModel(2, "efg", 0.1)
+
+        # Изменяем значения в одном экземпляре
+        model_1.feature_count = 15
+        model_1.label = "updated_label"
+        model_1.learning_rate = 0.05
+
+        self.assertEqual(model_2.feature_count, 2)
+        self.assertEqual(model_2.label, "efg")
+        self.assertEqual(model_2.learning_rate, 0.1)
+
+        self.assertNotEqual(
+            id(model_1.feature_count), id(model_2.feature_count)
+        )
+        self.assertNotEqual(id(model_1.label), id(model_2.label))
+        self.assertNotEqual(
+            id(model_1.learning_rate), id(model_2.learning_rate)
         )
 
-        with self.assertRaises(NotImplementedError) as context:
-            IncompleteClass().validate(object)
-        self.assertEqual(
-            str(context.exception), "Подклассы должны реализовать этот метод."
-        )
+    def test_descriptor_valid_invalid_values_handling(self):
+        """
+        Тест:
+        - Дескриптор принимает валидные значения и обновляет атрибут.
+        - Дескриптор отклоняет невалидные значения с исключением.
+        - При отклонении невалидного значения атрибут остается неизменным.
+        """
+        model = MLModel(feature_count=5, label="initial", learning_rate=0.1)
+
+        model.feature_count = 10
+        self.assertEqual(model.feature_count, 10)
+
+        with self.assertRaises(ValueError):
+            model.feature_count = -1
+        self.assertEqual(model.feature_count, 10)
+
+        with self.assertRaises(ValueError):
+            model.label = 123
+        self.assertEqual(model.label, "initial")
+
+        model.learning_rate = 0.05
+        self.assertEqual(model.learning_rate, 0.05)
+
+        with self.assertRaises(ValueError):
+            model.learning_rate = 1.5
+        self.assertEqual(model.learning_rate, 0.05)
