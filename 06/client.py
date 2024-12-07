@@ -1,8 +1,8 @@
 # pylint: disable=W0718
 
-import threading
-import socket
 import argparse
+import socket
+import threading
 from pathlib import Path
 
 
@@ -18,16 +18,17 @@ class URLClient:
         file_path = Path(base_path / file_path)
 
         with file_path.open("r", encoding="utf-8") as file:
-            urls = [line.strip() for line in file if line.strip()]
-        return urls
+            for line in file:
+                url = line.strip()
+                if url:
+                    yield url
 
     def get_next_url(self):
         with self.lock:
-            if self.url_index < len(self.urls):
-                url = self.urls[self.url_index]
-                self.url_index += 1
-                return url
-            return None
+            try:
+                return next(self.urls)
+            except StopIteration:
+                return None
 
     def send_url(self, url):
         try:
@@ -39,14 +40,34 @@ class URLClient:
                 response = client_socket.recv(4096).decode()
                 print(f"{url}: {response}")
         except Exception as e:
-            print(f"Error sending URL {url}: {e}")
+            raise RuntimeError(f"Error sending URL {url}: {e}") from e
 
     def run_thread(self):
-        while True:
-            url = self.get_next_url()
-            if url is None:
-                break
-            self.send_url(url)
+        try:
+            while True:
+                url = self.get_next_url()
+                if url is None:
+                    break
+
+                attempts = 0
+                max_retries = 3
+
+                while attempts < max_retries:
+                    try:
+                        self.send_url(url)
+                        break
+                    except RuntimeError as e:
+                        attempts += 1
+                        print(f"Attempt {attempts} failed for {url}: {e}")
+                        if attempts == max_retries:
+                            print(
+                                f"Failed to process {url}"
+                                f"after {max_retries} attempts."
+                            )
+                            break
+
+        except Exception as error_worker:
+            print(f"Critical error in worker thread: {error_worker}")
 
     def start(self):
         threads = []
