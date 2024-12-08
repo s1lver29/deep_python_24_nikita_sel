@@ -8,7 +8,7 @@ from queue import Queue
 from time import sleep
 from unittest.mock import MagicMock, patch
 
-from .server import MasterServer, Worker
+from .server import MasterServer, Worker, main
 
 
 class TestWorker(unittest.TestCase):
@@ -134,3 +134,49 @@ class TestMasterServer(unittest.TestCase):
         for resp in valid_responses:
             self.assertIsInstance(resp, dict)
             self.assertGreater(len(resp), 0)
+
+    def test_main(self):
+        """
+        Тест для проверки основной функции main.
+        """
+        with (
+            patch.object(MasterServer, "start_server") as mock_start_server,
+            patch.object(threading, "Thread") as mock_thread,
+        ):
+            with patch(
+                "argparse.ArgumentParser.parse_args"
+            ) as mock_parse_args:
+                mock_parse_args.return_value = MagicMock(workers=2, top_k=5)
+                main()
+                mock_start_server.assert_called_once()
+                mock_thread.assert_called_once()
+                mock_thread.return_value.start.assert_called_once()
+
+    def test_monitor_workers(self):
+        """
+        Тест для проверки метода monitor_workers.
+        """
+        # Создаем моки для потоков воркеров
+        mock_threads = [MagicMock(spec=threading.Thread) for _ in range(2)]
+        self.server.worker_threads = mock_threads
+
+        # Мокируем метод start_worker
+        with patch.object(self.server, "start_worker") as mock_start_worker:
+            # Запускаем мониторинг воркеров в отдельном потоке
+            monitor_thread = threading.Thread(
+                target=self.server.monitor_workers, daemon=True
+            )
+            monitor_thread.start()
+
+            # Имитируем сбой одного из воркеров
+            mock_threads[0].is_alive.return_value = False
+
+            # Даем время на проверку состояния воркеров
+            sleep(2)
+
+            # Проверяем, что start_worker был вызван для перезапуска воркера
+            mock_start_worker.assert_any_call(0)
+
+            # Останавливаем мониторинг
+            self.server.shutdown_flag.set()
+            monitor_thread.join()

@@ -7,6 +7,12 @@ from .client import URLClient
 
 
 class TestURLClient(unittest.TestCase):
+    def setUp(self):
+        print(f"\nStart test {self.id()}")
+
+    def tearDown(self):
+        print(f"End test {self.id()}")
+
     def test_get_next_url(self):
         """
         Тест корректности извлечения следующего URL.
