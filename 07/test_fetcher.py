@@ -1,4 +1,4 @@
-# pylint: disable=E0401
+# pylint: disable=E0401, C0413
 
 import os
 import sys
@@ -9,11 +9,11 @@ from unittest.mock import mock_open, patch
 import aiohttp
 from aioresponses import aioresponses
 
-from .fetcher import URLFetcher, main, load_urls_from_file
-
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "."))
 )
+
+from fetcher import URLFetcher, load_urls_from_file, main  # noqa: E402
 
 
 class TestURLFetcher(unittest.IsolatedAsyncioTestCase):
@@ -95,6 +95,10 @@ class TestURLFetcher(unittest.IsolatedAsyncioTestCase):
         """
         Тест для проверки основной функции main.
         """
+        file_path = "dummy_file.txt"
+
+        base_path = Path(__file__).parent
+        file_path = Path(base_path / file_path)
         with (
             patch("fetcher.load_urls_from_file") as mock_load_urls,
             patch("fetcher.URLFetcher.fetch_all") as mock_fetch_all,
@@ -103,9 +107,9 @@ class TestURLFetcher(unittest.IsolatedAsyncioTestCase):
                 "http://example.com/1",
                 "http://example.com/2",
             ]
-            await main(2, "dummy_file.txt")
+            await main(2, file_path)
 
-            mock_load_urls.assert_called_once_with("dummy_file.txt")
+            mock_load_urls.assert_called_once_with(file_path)
             mock_fetch_all.assert_called_once()
 
     @patch(
