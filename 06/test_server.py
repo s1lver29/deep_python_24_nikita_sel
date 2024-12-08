@@ -13,10 +13,14 @@ from .server import MasterServer, Worker
 
 class TestWorker(unittest.TestCase):
     def setUp(self):
+        print(f"\nStart test {self.id()}")
         self.master_mock = MagicMock()
         self.worker = Worker(
             queue=Queue(), top_k=5, master=self.master_mock, worker_id=0
         )
+
+    def tearDown(self):
+        print(f"End test {self.id()}")
 
     def test_is_valid_url(self):
         """
@@ -56,8 +60,11 @@ class TestWorker(unittest.TestCase):
 
 class TestMasterServer(unittest.TestCase):
     def setUp(self):
+        print(f"\nStart test {self.id()}")
+
+        self.port = 8081
         self.server = MasterServer(
-            host="localhost", port=8080, num_workers=2, top_k=5
+            host="localhost", port=self.port, num_workers=2, top_k=5
         )
         self.server_thread = threading.Thread(
             target=self.server.start_server, daemon=True
@@ -68,12 +75,15 @@ class TestMasterServer(unittest.TestCase):
     def tearDown(self):
         self.server.shutdown_flag.set()
         self.server_thread.join(timeout=2)
+        sleep(2)
+        print(f"End test {self.id()}")
 
     def test_valid_url_processing(self):
         """Тест, что сервер корректно обрабатывает валидный URL
         и возвращает непустой словарь с топ-словами."""
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect(("localhost", 8080))
+        client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        client_socket.connect(("localhost", self.port))
 
         url = "http://example.com"
         client_socket.sendall(url.encode())
@@ -90,7 +100,8 @@ class TestMasterServer(unittest.TestCase):
         """Тест, что сервер возвращает сообщение об ошибке
         при обработке невалидного URL."""
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect(("localhost", 8080))
+        client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        client_socket.connect(("localhost", self.port))
 
         url = "invalid_url"
         client_socket.sendall(url.encode())
@@ -109,7 +120,8 @@ class TestMasterServer(unittest.TestCase):
 
         for url in urls:
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            client_socket.connect(("localhost", 8080))
+            client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+            client_socket.connect(("localhost", self.port))
             client_socket.sendall(url.encode())
             response = client_socket.recv(4096).decode()
             responses.append(response)
