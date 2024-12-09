@@ -27,6 +27,12 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Build C extension and Install the package (hw 10)
+        run: |
+          cd 10
+          python setup.py build_ext --inplace
+          pip install .
+
       - name: Check flake8
         run: flake8 .
 
