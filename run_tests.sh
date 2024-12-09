@@ -1,6 +1,6 @@
 #!/bin/bash
 
-folders=("01" "02" "03" "04" "05" "06" "07")
+folders=("01" "02" "03" "04" "05" "06" "07" "10")
 
 for folder in "${folders[@]}"; do
   echo "Running tests for $folder/test_*.py"
