@@ -47,38 +47,38 @@ def test_serialization(obj, library):
 
 
 def main():
-    count_collection = 10000
-    number_iteration = 1000
+    count_collection = 10_000
+    number_iteration = 1_000
+    time_benchmark = {}
 
     print(f"Generating large JSON data... size={count_collection}")
-    large_json = generate_collection_large_json(count=10000)
+    large_json = generate_collection_large_json(count=count_collection)
     parsed_data = [json.loads(item) for item in large_json]
 
     print("\nMeasuring performance using timeit...")
-    json_parsing_time = timeit.timeit(
-        lambda: test_parsing(large_json, "json"), number=1000
-    )
+    function_test = [test_parsing, test_serialization]
+    data_test = [large_json, parsed_data]
 
-    custom_parsing_time = timeit.timeit(
-        lambda: test_parsing(large_json, "custom_json"), number=1000
-    )
-
-    json_serialization_time = timeit.timeit(
-        lambda: test_serialization(parsed_data, "custom_json"), number=1000
-    )
-
-    custom_serialization_time = timeit.timeit(
-        lambda: test_serialization(parsed_data, "custom_json"), number=1000
-    )
+    for func, data in zip(function_test, data_test):
+        for library in ("json", "custom_json"):
+            print(f"Start benchmark {library} - {func.__name__}")
+            time_benchmark[(func.__name__, library)] = timeit.timeit(
+                lambda f=func, data=data, lib=library: f(data, lib),
+                number=number_iteration,
+            )
 
     print(f"\nPerformance Results ({number_iteration} iterations):")
     print(
-        f"Standard JSON - Parsing: {json_parsing_time:.3f}s, "
-        f"Serialization: {json_serialization_time:.3f}s"
+        "Standard JSON - Parsing: "
+        f"{time_benchmark[("test_parsing", "json")]:.3f}s, "
+        "Serialization: "
+        f"{time_benchmark[("test_serialization", "json")]:.3f}s"
     )
     print(
-        f"Custom JSON   - Parsing: {custom_parsing_time:.3f}s, "
-        f"Serialization: {custom_serialization_time:.3f}s"
+        "Custom JSON   - Parsing: "
+        f"{time_benchmark[("test_parsing", "custom_json")]:.3f}s, "
+        "Serialization: "
+        f"{time_benchmark[("test_serialization", "custom_json")]:.3f}s"
     )
 
 
