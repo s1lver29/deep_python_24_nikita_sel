@@ -6,3 +6,5 @@ aiohttp==3.11.2
 aioresponses==0.7.7
 memory-profiler==0.61.0
 PyYAML==6.0.2
+setuptools==75.6.0
+faker==33.1.0
